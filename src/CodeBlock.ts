@@ -40,6 +40,23 @@ export class CodeBlock extends MarkdownRenderChild {
 
 	private async render(metaString: string): Promise<void> {
 		await this.plugin.highlighter.renderWithEc(this.source, this.language, metaString, this.containerEl);
+
+		// @ts-expect-error
+		const plugins = this.plugin.app.plugins;
+
+		if (plugins.enabledPlugins.has('code-emitter') && plugins.plugins['code-emitter'].renderCodeEmitterButton) {
+			const codeEmitter = plugins.plugins['code-emitter'].renderCodeEmitterButton({
+				lang: this.language,
+				code: this.source,
+				sourcePath: this.ctx.sourcePath,
+			}) as HTMLElement;
+
+			codeEmitter.style.paddingTop = 'var(--ec-codePadBlk)';
+			codeEmitter.style.paddingLeft = 'var(--ec-codePadBlk)';
+			codeEmitter.style.paddingRight = 'var(--ec-codePadBlk)';
+
+			this.containerEl.querySelector('figure > pre > code')?.appendChild(codeEmitter);
+		}
 	}
 
 	public async rerenderOnNoteChange(): Promise<void> {
